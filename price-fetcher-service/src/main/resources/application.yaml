@@ -1,0 +1,25 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: price-fetcher-service
+  
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        "[spring.json.add.type.headers]": "false"
+
+crypto:
+  api:
+    base-url: "${COINGECKO_BASE_URL:https://api.coingecko.com}"
+    polling-interval: 20000 
+  kafka:
+    topic:
+      name: crypto-prices
+      retention: 1h

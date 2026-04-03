@@ -1,0 +1,62 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: identity-service
+    url: http://host.docker.internal:8081
+    routes:
+      - name: auth-route
+        strip_path: false
+        paths:
+          - /api/v1/auth
+
+      - name: users-route
+        strip_path: false
+        paths:
+          - /api/v1/users
+        plugins:
+          - name: jwt
+            config:
+              key_claim_name: iss
+
+  - name: user-preference-service
+    url: http://host.docker.internal:8082
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: iss
+    routes:
+      - name: preferences-route
+        strip_path: false
+        paths:
+          - /api/v1/user-preferences
+
+  - name: price-fetcher-service
+    url: http://host.docker.internal:8083
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: iss
+    routes:
+      - name: price-route
+        strip_path: false
+        paths:
+          - /api/v1/prices
+
+consumers:
+  - username: cpas_frontend
+    jwt_secrets:
+      - key: "identity-service"
+        algorithm: RS256
+        secret: "placeholder-secret-not-used-for-rs256"
+        rsa_public_key: |-
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA95jl4/F7NUsij9KDJTp6
+          vP6SOrVYimIrUVz4rjajiibCILBAf4sTJKi8oVf5ivIy94gtawvAccw3WUc69+gg
+          5qirYvU7QcXobaMH1alOtKulkntAW1VkwNiNKb0bJJKR22uev+qcLzTNo2hzwZ8G
+          +iiRTA4waDeP16Ckd2IcuSSLV6TIsow8NfwVglqYWswCTYlY7V5XInViOB2LBb5z
+          KYg+Z7gX2rOQ802Ek9Ja8QottmXs5VuAkzaIe1DDNSem4kznMIfWMQiWNv891gEe
+          YQf6TukAbgosixFE0roZ5+qN79A2RTiXWMSEwXYRTOrfEfLURqowBJSFGBS1WtDY
+          SwIDAQAB
+          -----END PUBLIC KEY-----
+
