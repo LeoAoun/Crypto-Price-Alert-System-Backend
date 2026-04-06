@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.cpas.user_preference_service.infrastructure.security.AuthenticatedUser;
+import com.cpas.user_preference_service.infrastructure.security.AuthenticatedUserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 
@@ -36,34 +36,31 @@ public class UserPreferenceController {
     @PostMapping
     public UserPreference createUserPreference(
             @Valid @RequestBody CreateUserPreferenceDTO userPreferenceDTO,
-            @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getClaimAsString("userId"));
-        String phoneNumber = jwt.getClaimAsString("phoneNumber");
-        return useCase.createUserPreference(new CreateUserPreferenceCommand(userPreferenceDTO, userId, phoneNumber));
+            @AuthenticatedUser AuthenticatedUserDetails user) {
+        return useCase.createUserPreference(new CreateUserPreferenceCommand(
+            userPreferenceDTO, 
+            user.getUserId(), 
+            user.getPhoneNumber()
+        ));
     }
 
     @GetMapping
     public List<UserPreference> getAllUserPreferences(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size,
-            @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getClaimAsString("userId"));
-        boolean isAdmin = jwt.getClaimAsStringList("roles") != null && 
-                          jwt.getClaimAsStringList("roles").contains("ADMIN");
+            @AuthenticatedUser AuthenticatedUserDetails user) {
         
-        if (isAdmin) {
+        if (user.hasRole("ADMIN")) {
             return useCase.getAllUserPreferences(page, size);
         }
-        return useCase.getUserPreferencesByUserId(userId);
+        return useCase.getUserPreferencesByUserId(user.getUserId());
     }
 
     @DeleteMapping("/{id}")
     public void deleteUserPreferenceById(
             @PathVariable UUID id,
-            @AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getClaimAsString("userId"));
-        List<String> roles = jwt.getClaimAsStringList("roles");
-        useCase.deleteUserPreferenceById(new DeleteUserPreferenceCommand(id, userId, roles));
+            @AuthenticatedUser AuthenticatedUserDetails user) {
+        useCase.deleteUserPreferenceById(new DeleteUserPreferenceCommand(id, user.getUserId(), user.getRoles()));
     }
 
     @DeleteMapping
