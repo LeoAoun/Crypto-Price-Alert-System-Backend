@@ -6,6 +6,7 @@ import com.cpas.notification_service.application.port.out.NotificationProvider;
 import com.cpas.notification_service.domain.model.dto.PriceAlert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -17,6 +18,14 @@ public class SendNotificationUseCaseImpl implements SendNotificationUseCase {
     @Override
     public void processAlert(PriceAlert alert) {
         log.info("[SendNotificationUseCase] Received alert for processing: {}", alert);
+        
+        if (alert.timestamp() != null) {
+            long ageMillis = System.currentTimeMillis() - alert.timestamp();
+            if (ageMillis > TimeUnit.MINUTES.toMillis(5)) {
+                log.warn("[SendNotificationUseCase] Alert for {} is stale ({} ms old). Discarding.", alert.coinName(), ageMillis);
+                return;
+            }
+        }
         
         String condition = "BELOW_OR_EQUAL".equals(alert.alertType()) 
                 ? "just dropped below your target price!"

@@ -69,7 +69,8 @@ public class EvaluateAlertUseCaseImpl implements com.cpas.alert_evaluator_servic
                 cryptoPrice.priceUsd(),
                 preference.getPriceTargeted(),
                 type,
-                cryptoPrice.change24h()
+                cryptoPrice.change24h(),
+                System.currentTimeMillis()
         );
 
         alertProducer.sendAlert(cryptoAlert);

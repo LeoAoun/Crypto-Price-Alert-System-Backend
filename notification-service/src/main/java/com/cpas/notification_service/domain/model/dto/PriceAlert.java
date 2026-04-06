@@ -7,5 +7,6 @@ public record PriceAlert(
         Double currentPrice,
         Double priceTargeted,
         String alertType,
-        Double change24h) {
+        Double change24h,
+        Long timestamp) {
 }

@@ -5,9 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Annotation to bind the currently authenticated user's details to a controller method parameter.
- */
+// Annotation to bind the currently authenticated user's details to a controller method parameter.
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthenticatedUser {

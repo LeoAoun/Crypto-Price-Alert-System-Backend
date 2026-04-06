@@ -5,5 +5,6 @@ public record CryptoAlert(
         String phoneNumber,
         String coinName,
         Double currentPrice,
-        Double priceTargeted) {
+        Double priceTargeted,
+        Long timestamp) {
 }
